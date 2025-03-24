@@ -1,18 +1,36 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_list/auth_services/firebase_auth_servies.dart';
+import 'package:to_do_list/firebase_options.dart';
+import 'package:to_do_list/logic/streak_logic.dart';
+import 'package:to_do_list/pages/app.dart';
+import 'package:to_do_list/pages/signup.dart';
 
-void main() {
-  runApp(MaterialApp(
-    title: 'Login Page',
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: const Color.fromARGB(255, 19, 33, 46),
-      ),
-    ),
-    home: LoginPage(),
-  ));
+
+
+class LoginPage extends StatefulWidget {
+  @override
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class LoginPage extends StatelessWidget {
+class _LoginPageState extends State<LoginPage> {
+
+  final FireBaseAuthServices _auth =FireBaseAuthServices();
+  
+  // TextEditingController _usernamecontroller =TextEditingController();
+  TextEditingController _emailcontroller =TextEditingController();
+  TextEditingController _passwordcontroller =TextEditingController();
+
+  @override
+  void dispose() {
+    ;
+    _emailcontroller.dispose();
+    _passwordcontroller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Define custom color using RGB values
@@ -32,17 +50,18 @@ class LoginPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            // SizedBox(height: 16.0),
+            // TextField(
+            //   decoration: InputDecoration(
+            //     labelText: 'Username',
+            //     border: OutlineInputBorder(),
+            //     fillColor: Colors.white,
+            //     filled: true,
+            //   ),
+            // ),
             SizedBox(height: 16.0),
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
-                fillColor: Colors.white,
-                filled: true,
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
+              controller: _emailcontroller,
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
@@ -52,6 +71,7 @@ class LoginPage extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             TextField(
+              controller: _passwordcontroller,
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
@@ -63,17 +83,17 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 32.0),
             ElevatedButton(
               onPressed: () {
-                // Add your authentication logic here
+                _signin();// Add your authentication logic here
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: customColor, // Use custom color
+                // backgroundColor: customColor, // Use custom color
               ),
               child: Text('Sign In'),
             ),
             SizedBox(height: 16.0),
             GestureDetector(
               onTap: () {
-                // Navigate to signup screen or perform signup action
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> SignUpPage()),ModalRoute.withName('/'));
               },
               child: Text(
                 "Not already a user? Sign up",
@@ -88,4 +108,18 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
+  void _signin() async{
+  
+  String email = _emailcontroller.text;
+  String password = _passwordcontroller.text;
+
+  User? user = await _auth.signInWithEmailAndPassword(email, password);
+
+  if(user!=null){
+    print("User is successfully signed in");
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage()));
+  }else{
+    print("some error happened");
+  }
+}
 }

@@ -1,10 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:to_do_list/widgets/task_wigdet.dart';
+
 
 
 class FireStoreServices{
-  final taskdoc =FirebaseFirestore.instance.collection('Tasks');
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String get uid => _auth.currentUser!.uid;
+
+  get taskdoc => FirebaseFirestore.instance.collection('Users').doc(uid).collection('Tasks');
 
   //CREATE
   Future createTask(Map <String,dynamic> taskMap) async{
@@ -44,8 +49,7 @@ class FireStoreServices{
     Stream<QuerySnapshot> getTasksForDay(DateTime day) {
     DateTime startOfDay = DateTime(day.year, day.month, day.day);
     DateTime endOfDay = startOfDay.add(Duration(days: 1));
-    return FirebaseFirestore.instance
-        .collection('Tasks')
+    return taskdoc
         .where('due', isGreaterThanOrEqualTo: startOfDay, isLessThan: endOfDay)
         .where('completed',isEqualTo: false)
         .snapshots();
